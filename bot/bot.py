@@ -56,7 +56,7 @@ class RCDONBot:
         Try checking for phone number, goodware should ask for phone number
         """
         user = update.effective_user
-        print(user)
+
         update.message.reply_markdown_v2(
             fr'Hi {user.mention_markdown_v2()}\!',
             reply_markup=ForceReply(selective=True)

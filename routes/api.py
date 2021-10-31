@@ -1,10 +1,11 @@
 from flask import request
-import logging
 
 def load_api_routes(app, *args, **kwargs):
     """ 
     Params:
         app - The main flask app instance
+
+    This function loads the API routes when called.
     """
     # TODO: Build more endpoints, integrate SQLite database
     bot = kwargs['bot']

@@ -10,10 +10,11 @@ load_dotenv('.env')
 # Start the telegram bot
 bot = RCDONBot()
 
+# Create flask app instance
 app = Flask(__name__)
 
 # Load the API routes.
-# The telegram bot is passed as through kwargs
+# The telegram bot is passed through kwargs
 load_all_routes(app, bot=bot)
 
 bot.updater.idle()
