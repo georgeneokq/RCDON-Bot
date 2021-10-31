@@ -1,6 +1,6 @@
-from flask import request
+from flask import request, Flask
 
-def load_api_routes(app, *args, **kwargs):
+def load_api_routes(app: Flask, *args, **kwargs) -> None:
     """ 
     Params:
         app - The main flask app instance
@@ -17,6 +17,25 @@ def load_api_routes(app, *args, **kwargs):
         response = {
             "err": 0,
             "msg": "ok"
+        }
+
+        return response
+
+    @app.route('/api/can_kms', methods=['POST'])
+    def can_kms():
+        return "no"
+
+    @app.route('/api/always_can_kms', methods=['POST'])
+    def always_can_kms():
+        """ For client to poll as a kill switch """
+        print(request.json)
+
+        response = {
+            "err": 0,
+            "msg": "ok",
+            "data": {
+                "can_kill": True
+            }
         }
 
         return response
