@@ -21,5 +21,5 @@ load_all_routes(app, bot=bot)
 if __name__ == '__main__':
     print('Starting flask app and telegram bot, press Ctrl+C twice to terminate the program.')
     app.run()
-    print('Flask app stopped, press Ctrl+C one more time to stop the bot.')
+    print('Flask app stopped, press Ctrl+C to stop the bot. This may take some time, spam Ctrl+C and ENTER key to speed up the process.')
     bot.updater.idle()
