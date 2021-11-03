@@ -46,7 +46,7 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
 
         return response
 
-    @app.route('/api/can_kms', methods=['POST'])
+    @app.route('/api/can-kms', methods=['POST'])
     def can_kms():
         key = request.form['key']
 
@@ -70,7 +70,7 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
         }
 
 
-    @app.route('/api/always_can_kms', methods=['POST'])
+    @app.route('/api/always-can-kms', methods=['POST'])
     def always_can_kms():
         """ For client to poll as a kill switch """
         response = {
