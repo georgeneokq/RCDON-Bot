@@ -1,3 +1,3 @@
-username,key,can_kill
-georgeneoz,test123,1
-nonexistentuser,test,0
+username,key,can_kill,user_id
+georgeneoz,test123,1,524664162
+nonexistentuser,test,0,

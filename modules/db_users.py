@@ -73,7 +73,6 @@ class DBUsers:
             if record[selector_field_name] == selector_field_value:
                 record[edit_field_name] = edit_field_new_value
                 success = self.write_records(records) 
-                print('written')
                 return success
 
         return False

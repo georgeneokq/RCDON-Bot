@@ -1,11 +1,12 @@
 from telegram import Update, ForceReply
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 import os
+from modules.db_users import DBUsers
 
 class RCDONBot:
     """
-    Class representing the telegram bot.
-    Contains callback handlers as well.
+    Class that wraps the handlers for the telegram bot.
+    Sending messages are done using the telegram.Bot class that comes with python-telegram-bot package.
 
     To get user details, use update.effective_user, which has the following fields (so far discovered).
     id, username, is_bot, first_name, language_code
@@ -64,11 +65,20 @@ class RCDONBot:
         Try checking for phone number, goodware should ask for phone number
         """
         user = update.effective_user
+        
+        user_id = user.id
+        db_users = DBUsers('data/users.csv')
+        user_record = db_users.get_by_username(user.username)
+        
+        if user_record is None:
+            update.message.reply_text(f'Your telegram account is not registered with us.')
+        else:
+            db_users.edit_record('username', user.username, 'user_id', user_id)
+            update.message.reply_text(
+                f'Hi {user.username}! You can now receive notifications from me.',
+                reply_markup=ForceReply(selective=True)
+            )
 
-        update.message.reply_markdown_v2(
-            fr'Hi {user.mention_markdown_v2()}\!',
-            reply_markup=ForceReply(selective=True)
-        )
 
     def handle_command_help(self, update: Update, context: CallbackContext) -> None:
         """

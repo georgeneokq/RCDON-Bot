@@ -1,5 +1,8 @@
 from flask import request, Flask
 from modules.db_users import DBUsers
+from telegram.bot import Bot
+from telegram.error import TelegramError
+from os import getenv
 
 def load_api_routes(app: Flask, *args, **kwargs) -> None:
     """ 
@@ -8,7 +11,9 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
 
     This function loads the API routes when called.
     """
-    bot = kwargs['bot']
+    # bot: RCDONBot = kwargs['bot']
+    bot = Bot(getenv('BOT_TOKEN'))
+
     db_users = DBUsers('data/users.csv')
     
     # Routes to "report"/update status
@@ -19,13 +24,28 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
         Receive reports of unauthorized usage of devices.
         Send a message to the telegram bot associated with the key
 
-        TODO: Take message from the binary, send it to the associated telegram client as-is
+        Request body:
+            "key" - API key
+            "message" - Message to be send to the telegram bot
 
         Possible responses:
             "true" - The message was successfully sent to the client
             "false" - Some error occurred while sending message to the client
         """
-        print(request.json)
+        key = request.json.get('key')
+        message = request.json.get('message')
+
+        # Get user by key, send message to associated user
+        user: dict = db_users.get_by_key(key)
+        if user.get('user_id') is None:
+            return "false"
+
+        print(f'Sending message to {user.get("username")} (chat id {user.get("user_id")})')
+        try:
+            bot.send_message(user.get('user_id'), message)
+        except TelegramError as e:
+            print('Unexpected error occurred while sending the message to the user.')
+            return "false"
         
         return "true"
 
@@ -35,6 +55,9 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
         """
         For client to report that the client has been successfully unblocked.
         The kill switch for the client will be reset.
+
+        Request body:
+            "key" - API key
 
         Possible responses:
             "true" - Kill switch update success
@@ -55,6 +78,9 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
     def can_kms():
         """
         For client to poll as a kill switch
+
+        Request body:
+            "key" - API key
 
         Possible responses:
             "true" - Can kys
@@ -78,6 +104,8 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
     def always_can_kms():
         """
         For client to poll as a kill switch, always returns true. For testing purposes only.
+
+        Request body: -
         
         Possible responses:
             "true"
