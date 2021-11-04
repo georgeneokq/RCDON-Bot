@@ -25,7 +25,7 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
             "true" - The message was successfully sent to the client
             "false" - Some error occurred while sending message to the client
         """
-        print(request.form)
+        print(request.json)
         
         return "true"
 
@@ -41,7 +41,7 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
             "invalid" - Invalid key
         """
         # Update CSV file
-        key = request.form.get('key')
+        key = request.json.get('key')
 
         # Reset the kill switch
         success = db_users.edit_record('key', key, 'can_kill', 0)
@@ -61,7 +61,7 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
             "false" - Cannot kys
             "invalid" - Invalid key
         """
-        key = request.form['key']
+        key = request.json['key']
 
         # Retrieve by key
         record = db_users.get_by_key(key)
