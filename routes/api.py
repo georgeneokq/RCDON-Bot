@@ -15,9 +15,45 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
     bot = Bot(getenv('BOT_TOKEN'))
 
     db_users = DBUsers('data/users.csv')
-    
-    # Routes to "report"/update status
-    # TODO: Maybe report a breach
+
+    @app.route('/api/can-kms', methods=['POST'])
+    def can_kms():
+        """
+        For client to poll as a kill switch
+
+        Request body:
+            "key" - API key
+
+        Possible responses:
+            "true" - Can kys
+            "false" - Cannot kys
+            "invalid" - Invalid key
+        """
+        key = request.json['key']
+
+        # Retrieve by key
+        record = db_users.get_by_key(key)
+        
+        if record is None:
+            return "invalid"
+        
+        can_kill = str(bool(int(record['can_kill']))).lower()
+        
+        return can_kill
+
+
+    @app.route('/api/always-can-kms', methods=['POST'])
+    def always_can_kms():
+        """
+        For client to poll as a kill switch, always returns true. For testing purposes only.
+
+        Request body: -
+        
+        Possible responses:
+            "true"
+        """
+        return "true"
+
     @app.route('/api/report/breach', methods=['POST'])
     def report_breach():
         """
@@ -72,42 +108,4 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
         if not success:
             return "invalid"
         
-        return "true"
-
-    @app.route('/api/can-kms', methods=['POST'])
-    def can_kms():
-        """
-        For client to poll as a kill switch
-
-        Request body:
-            "key" - API key
-
-        Possible responses:
-            "true" - Can kys
-            "false" - Cannot kys
-            "invalid" - Invalid key
-        """
-        key = request.json['key']
-
-        # Retrieve by key
-        record = db_users.get_by_key(key)
-        
-        if record is None:
-            return "invalid"
-        
-        can_kill = str(bool(int(record['can_kill']))).lower()
-        
-        return can_kill
-
-
-    @app.route('/api/always-can-kms', methods=['POST'])
-    def always_can_kms():
-        """
-        For client to poll as a kill switch, always returns true. For testing purposes only.
-
-        Request body: -
-        
-        Possible responses:
-            "true"
-        """
         return "true"
