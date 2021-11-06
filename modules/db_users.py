@@ -42,7 +42,7 @@ class DBUsers:
             return None
 
         for record in records:
-            if record['username'] == username:
+            if record.get('username') == username:
                 return record
 
         return None
@@ -56,9 +56,23 @@ class DBUsers:
             return None
 
         for record in records:
-            if record['key'] == key:
+            if record.get('key') == key:
                 return record
 
+        return None
+
+    def get_by_id(self, id):
+        """
+        Get record by telegram user ID
+        """
+        records = self.get_records()
+        if len(records) == 0:
+            return None
+
+        for record in records:
+            if record.get('user_id') == str(id):
+                return record
+        
         return None
 
     def edit_record(self, selector_field_name, selector_field_value, edit_field_name, edit_field_new_value) -> bool:
@@ -70,7 +84,7 @@ class DBUsers:
             return False
 
         for record in records:
-            if record[selector_field_name] == selector_field_value:
+            if record.get(selector_field_name) == str(selector_field_value):
                 record[edit_field_name] = edit_field_new_value
                 success = self.write_records(records) 
                 return success

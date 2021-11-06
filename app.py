@@ -17,7 +17,6 @@ app = Flask(__name__)
 load_routes(app)
 
 if __name__ == '__main__':
-    print('Starting flask app and telegram bot, press Ctrl+C twice to terminate the program.')
+    print('Starting flask app and telegram bot, press Ctrl+Pause to terminate the program.')
     app.run()
-    print('Flask app stopped, press Ctrl+C to stop the bot. This may take some time, spam Ctrl+C and ENTER key to speed up the process.')
     rcdon_bot.updater.idle()

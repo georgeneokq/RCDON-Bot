@@ -75,7 +75,7 @@ class RCDONBot:
         else:
             db_users.edit_record('username', user.username, 'user_id', user_id)
             update.message.reply_text(
-                f'Hi {user.username}! You can now receive notifications from me.',
+                f'Hi {user.username}! You can now receive notifications from us.',
                 reply_markup=ForceReply(selective=True)
             )
 
@@ -86,17 +86,37 @@ class RCDONBot:
 
         Send help message
         """
-        update.message.reply_text("Under maintenance")
+        update.message.reply_text("/start\n/kill\n/help")
+
+    def handle_command_kill(self, update: Update, context: CallbackContext) -> None:
+        """
+        /kill
+
+        Set kill switch for the user
+        """
+        user = update.effective_user
+        user_id = user.id
+
+        if not self.has_user_started(user_id):
+            update.message.reply_text('Please enter /start to complete the registration process.')
+            return
+
+        db_users = DBUsers('data/users.csv')
+        
+        success = db_users.edit_record('user_id', user_id, 'can_kill', 1)
+
+        if success:
+            update.message.reply_text("The binary may proceed to kill itself.")
+        else:
+            update.message.reply_text("Command failed.")
+
 
     def handle_message(self, update: Update, context: CallbackContext):
-        user = update.effective_user
-        update.message.reply_text(f'Back to {user.username}: {update.message.text}')
+        """ Handle any messages that are not commands """
+        update.message.reply_text(f'Type /help to view the available list of commands.')
 
-
-# For testing only
-if __name__ == '__main__':
-    from dotenv import load_dotenv
-    load_dotenv('../.env')
-    token = os.getenv('BOT_TOKEN')
-    bot = RCDONBot(token)
-    bot.updater.idle()
+    def has_user_started(self, user_id):
+        """ Check whether user has used /start command to complete registration process. """
+        db_users = DBUsers('data/users.csv')
+        user_record = db_users.get_by_id(user_id)
+        return user_record is not None
