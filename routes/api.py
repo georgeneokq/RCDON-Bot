@@ -3,9 +3,10 @@ from modules.db_users import DBUsers
 from telegram.bot import Bot
 from telegram.error import TelegramError
 from os import getenv
+import time
 
 def load_api_routes(app: Flask, *args, **kwargs) -> None:
-    """ 
+    """
     Params:
         app - The main flask app instance
 
@@ -31,14 +32,20 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
         """
         key = request.json['key']
 
-        # Retrieve by key
-        record = db_users.get_by_key(key)
-        
-        if record is None:
-            return "invalid"
-        
-        can_kill = str(bool(int(record['can_kill']))).lower()
-        
+        while True:
+            time.sleep(0.2)
+            # Retrieve by key
+            record = db_users.get_by_key(key)
+
+            if not record:
+                return "invalid"
+
+            can_kill = str(bool(int(record['can_kill']))).lower()
+
+            # print(prev_state != can_kill)
+            if(can_kill == "true"):
+                break
+
         return can_kill
 
 
@@ -48,7 +55,7 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
         For client to poll as a kill switch, always returns true. For testing purposes only.
 
         Request body: -
-        
+
         Possible responses:
             "true"
         """
@@ -82,7 +89,7 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
         except TelegramError as e:
             print('Unexpected error occurred while sending the message to the user.')
             return "false"
-        
+
         return "true"
 
     # Report that the device has been unblocked. Toggle can_kill switch in database
@@ -107,5 +114,5 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
 
         if not success:
             return "invalid"
-        
+
         return "true"
