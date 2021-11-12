@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import request, Flask
 from modules.db_users import DBUsers
 from telegram.bot import Bot
@@ -6,6 +7,8 @@ from os import getenv
 import time
 import io
 import re
+
+TIMEOUT_THRESHOLD = 30
 
 def load_api_routes(app: Flask, *args, **kwargs) -> None:
     """
@@ -34,7 +37,10 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
         """
         key = request.json['key']
 
-        while True:
+        start_time = datetime.now()
+
+        can_kill = "false"
+        while (datetime.now()-start_time).total_seconds() <= TIMEOUT_THRESHOLD:
             time.sleep(0.2)
             # Retrieve by key
             record = db_users.get_by_key(key)
