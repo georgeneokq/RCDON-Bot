@@ -77,7 +77,8 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
 
         Request body:
             "key" - API key
-            "message" - Message to be send to the telegram bot
+            "type" - Specifies whether to send as a file or text message 
+            "message" - Message to be sent to the telegram bot
 
         Possible responses:
             "true" - The message was successfully sent to the client
@@ -93,7 +94,7 @@ def load_api_routes(app: Flask, *args, **kwargs) -> None:
             return "false"
 
         file = None
-        if type=='file':
+        if type == 'file':
             # The message first line will be sent as a message to the
             # user, the subsequent line will be sent as a file
             split_message = message.split('\n')
